@@ -153,7 +153,41 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        return self.max_step(gameState, 0)[0] #starting with max becasue pacman is max (tuple: 0: action, 1: evaluation value)
         util.raiseNotDefined()
+
+
+    def minimax(self, gameState, agent, depth):#this function is a "controller" to check if we are done and to run the correct next steps for the max_value and min_value
+        if (depth == self.depth * gameState.getNumAgents()) or gameState.isWin() or gameState.isLose(): #checking if we need to finish the repercussion and return evaluation number
+            return self.evaluationFunction(gameState) #because of the fact that we use depth we have to find the desire depth for every agent so we need to have as many repercussions as self.depth * numAgents
+        elif agent == 0:
+            return self.max_step(gameState, depth)[1] #returns the value instead of the action cause we dont need it into our max_value or min_value fuc
+        else:
+            return self.min_step(gameState, agent, depth)[1] #adding agent cause in max we always use pacman (index 0) for ghosts we have from one to numAgents-1
+
+    def max_step(self, gameState, depth):
+        best = []
+        best.append((None, float('-Inf'))) #initialize the list with a very small number (found representation of infinite online)
+        for action in gameState.getLegalActions(0):
+            best.append((action, self.minimax(gameState.generateSuccessor(0, action), (depth+1) % gameState.getNumAgents(), depth+1))) #for every action run minmax to see if we have finished or what the next step is and higher the depth by one
+            #we need (depth +1) % numAgents because we need to go from 0 to numAgents but for every depth that we are in (as much as you go higher in depth, the output of depth%numAgents will be from 0 to numAgents)
+        maximum = (None, float('-Inf')) #find out the maximum value out of all, tried to use max() but couldnt make it work so used the old-fashion way
+        for item in best:
+            if item[1] > maximum[1]:
+                maximum = item
+        return maximum
+
+    def min_step(self, gameState, agent, depth): #similar with max_value but added agent because we are going through many ghost-agents
+        best = []
+        best.append((None, float('+Inf')))
+        for action in gameState.getLegalActions(agent):
+            best.append((action, self.minimax(gameState.generateSuccessor(agent, action), (depth+1) % gameState.getNumAgents(), depth+1)))
+        minimum = (None, float('+Inf'))
+        for item in best:
+            if item[1] < minimum[1]: #and changed to minimum
+                minimum = item
+        return minimum
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
