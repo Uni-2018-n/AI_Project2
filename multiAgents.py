@@ -199,7 +199,41 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        return self.max_step(gameState, 0, 0, float('-Inf'), float('+Inf'))[0] #same with minimax but added a really small and really big value to a,b so the bigger(or smaller)-number calculations will work always
         util.raiseNotDefined()
+
+    def alpha_beta(self, gameState, agent, depth, a, b): #nothing changed here, same logic with minimax but added a,b variables
+        if (depth == self.depth * gameState.getNumAgents()) or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        if agent == 0:
+            return self.max_step(gameState, agent, depth, a, b)[1]
+        else:
+            return self.min_step(gameState, agent, depth, a, b)[1]
+
+
+    def max_step(self, gameState, agent, depth, a, b): #combined the provided code with my minimax code
+        best = (None, float('-Inf')) #decided to not use arrays because it is easier to use the provided pseudocode without arrays
+        for action in gameState.getLegalActions(agent):
+            temp = (action, self.alpha_beta(gameState.generateSuccessor(agent, action), (depth+1) % gameState.getNumAgents(), depth+1, a, b))
+            if temp[1] > best[1]: #so i had to check here the best number, inside the loop
+                best = temp #again max and min functions returned exception for some reason so i did it my self, i couldnt find a way to max-min the second value of the tuple maybe thats why
+            if best[1] > b: #here we got the alpha_beta diffrence with minimax basically if we return a value we skip the other LegalActions
+                return best
+            elif best[1] > a:
+                a= best[1]
+        return best
+
+    def min_step(self, gameState, agent, depth, a, b): #exactly the same with max_step, diffrence is the comparisson signs and we flip a with b and b with a
+        best = (None, float('+Inf'))
+        for action in gameState.getLegalActions(agent):
+            temp = (action, self.alpha_beta(gameState.generateSuccessor(agent, action), (depth+1) % gameState.getNumAgents(), depth+1, a, b))
+            if temp[1] < best[1]:
+                best = temp
+            if best[1] < a:
+                return best
+            elif best[1] < b:
+                b= best[1]
+        return best
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
