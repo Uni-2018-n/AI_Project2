@@ -248,7 +248,39 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+        return self.max_step(gameState, 0)[0]
         util.raiseNotDefined()
+
+    #for this i used my original minimax implementation for controller(expectimax) and max_step (copy, paste) and added action because in expectimax we use max's action only
+    def expectimax(self, gameState, agent, action, depth):
+        if (depth == self.depth* gameState.getNumAgents()) or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        if agent == 0:
+            return self.max_step(gameState, depth)[1]
+        else:
+            return self.minchance_step(gameState, agent, action, depth)[1]
+
+    def max_step(self, gameState, depth):#no need to receive action here, because here we produce it and send it to the expectimax
+        best = []
+        best.append((None, float('-Inf')))
+        for action in gameState.getLegalActions(0):
+            best.append((action, self.expectimax(gameState.generateSuccessor(0, action), (depth+1) % gameState.getNumAgents(), action, depth+1)))
+        maximum = (None, float('-Inf'))
+        for item in best:
+            if item[1] > maximum[1]:
+                maximum = item
+        return maximum
+
+    def minchance_step(self, gameState, agent, action, depth):#for min_step i used the mini_step of minimax but added some features
+        fin =0 #here will be stored the average value
+        propability = 1.0/len(gameState.getLegalActions(agent)) #because of the fact that the assignment tells us that its "uniformly random" i suppose this is ok
+        for actions in gameState.getLegalActions(agent):
+            temp = self.expectimax(gameState.generateSuccessor(agent, actions), (depth+1) % gameState.getNumAgents(), action, depth+1) #passing the given action as action (not for the next state) because in the algorithm we use that
+            if not(isinstance(temp, float)): #this here helps me to find if the variable is tupple or float, had many exceptions and this is the only way i found to fix them...
+                fin = fin + (temp[1] * propability) #if its a tupple use the [1] and caluclate the average
+            else:
+                fin = fin + (temp * propability) #if not use it as a normal float variable
+        return (action, fin) #and return the action and the average
 
 def betterEvaluationFunction(currentGameState):
     """
