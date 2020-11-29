@@ -290,6 +290,38 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
+    pacman = currentGameState.getPacmanPosition() #initializing
+    ghosts = currentGameState.getGhostPositions()
+    foods  = currentGameState.getFood().asList()
+    capsules = currentGameState.getCapsules()
+    plus =0
+    if currentGameState.isWin(): #checking if is win or lose, numbers is random
+        plus += 50
+    elif currentGameState.isLose():
+        plus -= 50
+    closest_food = float('Inf') #find the closest food and add it into the plus
+    for food in foods:
+        closest_food = min(closest_food, manhattanDistance(pacman, food))
+    plus += closest_food
+    closest_capsule = float('Inf')#same with the capsules
+    for capsule in capsules:
+        closest_capsule = min(closest_capsule, manhattanDistance(pacman, capsule))
+    plus += closest_capsule
+    if closest_food > closest_capsule: #if the capsule is closest its better to chose it and go there
+        plus += closest_capsule*2
+
+    closest_ghost = float('Inf')#find the closest ghost
+    for ghost in ghosts:
+        closest_ghost = min(closest_ghost, manhattanDistance(pacman, ghost))
+    if closest_ghost == 1: #if its that close we are in a really bad position and we need to leave
+        return float('-Inf')
+    elif closest_ghost == 2: #if its 2 steps away its not that bad but still bad
+        plus = plus/2.0
+    else: #if not we ok so we add it
+        plus += closest_ghost
+
+    return currentGameState.getScore() + pow(plus, -1) #chose the antistrofo from the first evaluation function
+    #no need to do plus + 1 at the end cause its 100% that at least one ghost will be alive or if not, at least one food or capsule will exist
     util.raiseNotDefined()
 
 # Abbreviation
