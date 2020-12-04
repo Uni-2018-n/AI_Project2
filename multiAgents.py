@@ -92,6 +92,7 @@ class ReflexAgent(Agent):
                 plus += 50 #give points because we make ghosts to go away
             elif distance < 2:#incase of ghost being near, if we had < 1 the ghosts next move could be deadly for us
                 plus -= 100
+
         return successorGameState.getScore()+ pow(plus, -1)#antistrofh timh toy plus
 
 def scoreEvaluationFunction(currentGameState):
